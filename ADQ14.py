@@ -39,11 +39,11 @@ n_of_ADQ=0
 numAverages=0
 rollingAverage=[]
 
-pv=configReader.getContents(os.getcwd()+'\PV.txt')
-config=configReader.getContents(os.getcwd()+'\config.txt')
+pv=configReader.getContents(os.getcwd()+'\PV.config')
+config=configReader.getContents(os.getcwd()+'\config.config')
 
 def reloadFolder():
-    config=configReader.getContents(os.getcwd()+'\config.txt')
+    config=configReader.getContents(os.getcwd()+'\config.config')
     if "Scan Folder" in config:
         defaultFolder=config["Scan Folder"]
         if "\n" in defaultFolder:
@@ -82,7 +82,7 @@ def initialize(samples, pretriggerPercentage):
     #Setting variables
     samples_per_record=samples
     pretrigger = int(pretriggerPercentage*samples*.01)
-    config=configReader.getContents(os.getcwd()+'\config.txt')
+    config=configReader.getContents(os.getcwd()+'\config.config')
     if 'Num Repeats' in config:
         numAverages=int(config['Num Repeats'])
     else:

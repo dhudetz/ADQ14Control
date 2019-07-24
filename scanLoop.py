@@ -16,7 +16,7 @@ import os
 scanStatus=0
 run=False
 initializing=False
-pv=configReader.getContents(os.getcwd()+'\PV.txt')
+pv=configReader.getContents(os.getcwd()+'\PV.config')
 
 def infiniteLoop():
     global scanStatus, run

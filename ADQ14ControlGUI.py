@@ -287,7 +287,7 @@ def showScreen(screenIndex):
     screens[screenIndex].pack()
 
 def updateConfig():
-    file=open(os.getcwd()+"\config.txt", 'w')
+    file=open(os.getcwd()+"\config.config", 'w')
     file.write('Number of Samples : '+sampleEntry.get()+'\n')
     file.write('Trig Delay : '+str(trigDelay.get())+'\n')
     file.write('Digitizer Name : '+str(nameEntry.get())+'\n')
@@ -313,7 +313,7 @@ def updateConfig():
 def updatePVs():
     userLines=[]
     pvLines=[]
-    pvPath=os.getcwd()+"\pv.txt"
+    pvPath=os.getcwd()+"\pv.config"
     for line in userTextBox.get('1.0', 'end-1c').splitlines():
         userLines.append(line)
     for line in pvTextBox.get('1.0', 'end-1c').splitlines():
@@ -336,8 +336,8 @@ def updatePVs():
 
 
 ###############################################################################
-config=configReader.getContents(os.getcwd()+"\config.txt")
-pv=configReader.getContents(os.getcwd()+"\PV.txt")
+config=configReader.getContents(os.getcwd()+"\config.config")
+pv=configReader.getContents(os.getcwd()+"\PV.config")
 if "Scan Folder" in config:
     defaultFolder=config["Scan Folder"]
     if "\n" in defaultFolder:
@@ -456,8 +456,9 @@ for i, name in enumerate(channelNames):
     channelCheckboxesVar.append(t.IntVar())
     check=t.Checkbutton(screen1, text="Channel "+name, var=channelCheckboxesVar[i])
     check.grid(row=6+i, column=1)
-    if useChannels[i]=='1':
-        check.select()
+    if 'Use Channels' in config:
+        if useChannels[i]=='1':
+            check.select()
 
 updateConfigButton=t.Button(screen1, text="Update Configuration", command=updateConfig)
 updateConfigButton.grid(row=6+len(channelNames), column=0, columnspan=2)

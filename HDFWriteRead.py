@@ -19,7 +19,7 @@ import datetime
 import gc
 import configReader
 
-config=configReader.getContents(os.getcwd()+"\config.txt")
+config=configReader.getContents(os.getcwd()+"\config.config")
 if "Scan Folder" in config:
     defaultFolder=config["Scan Folder"]
     if "\n" in defaultFolder:
@@ -42,7 +42,7 @@ class write:
         if newFile:
             file.attrs.create("# Coords", 0)
             file.attrs.create("TimeStamp", datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), dtype="S20")
-            config=configReader.getContents(os.getcwd()+"\config.txt")
+            config=configReader.getContents(os.getcwd()+"\config.config")
             for key in config:
                 file.attrs.create(key, config[key], dtype="S60")
         return file
