@@ -1,0 +1,14 @@
+Scan Button : 7bmb1:scan1.EXSC
+Busy Button : 7bmb1:rad:get_data
+Scan Number : 7bmb1:saveData_scanNumber
+APSRingCurrent(mA) : S:SRcurrentAI.VAL
+PINamplGain : 7bmb1:femto1:GainIndex
+PINamplBandwith : 7bmb1:femto1:Filter
+BIMampGain : 7bmb1:femto2:GainIndex
+BIMampBandwith : 7bmb1:femto2:Filter
+APSBarometricPressure(mbar) : APS:BarometricPressure:MBR.VAL
+Hutch Temp(degC) : 7bm_dau1:dau:009:ADC
+Air Pressure(psia) : 7bm_dau1:userCalcOut4.VAL
+X : 7bmb1:aero:m2.VAL
+Y : 7bmb1:aero:m1.VAL
+Theta : 7bmb1:m25.VAL

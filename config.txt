@@ -1,0 +1,10 @@
+Number of Samples : 1000000
+
+Trig Delay : 55
+Digitizer Name : ADQ14DC-4A-VG-USB
+
+Num Repeats : 16
+
+Use Channels : 1000
+Scan Folder : D:\Programming\FuelSpray\Acquisition\ADQ14\1.8\Scans
+Auto Average : 1

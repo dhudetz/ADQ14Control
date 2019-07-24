@@ -1,0 +1,5 @@
+#Scan folder#
+Scans/
+#Logs#
+spd_adqcontrolunit_trace.log
+spd_device_t714_usb3_10005_trace.log
