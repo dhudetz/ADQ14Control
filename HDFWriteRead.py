@@ -56,7 +56,7 @@ class write:
             coord = file.get(list(file.items())[int(coordNum)][0]) #second index of items is just the name
         except:
             file.close()
-            raise IndexError("Coordinate does not exist")
+            pass
         return coord
     
     def coordinate(file, coordHeader={}):

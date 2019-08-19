@@ -196,29 +196,29 @@ def rawGraph():
     scan.close()
     time=range(0,samplePeriodNano*(len(voltage)),samplePeriodNano)
     newPlotWindow(time, voltage, "Time (ns)", "Voltage (V)", "Raw graph for scan "+scanNum+" coord "+coordNum+" channel "+channelNum)
-
-def processedGraph():
-    scanNum=scans.get()
-    coordNum=coordinates.get()
-    channelNum=convertChannelNameToIndex(channels.get())
-    scan=read.scan(scanNum)
-    coord=read.coordinate(scan, coordNum)
-    channel = read.channel(coord, channelNum)
-    attrs=read.channelHeader(channel)
-    samplePeriodNano=int(attrs['SamplePeriod'])
-    samplePeriod=1e-9*samplePeriodNano
-    voltage=read.channelData(channel)
-    scan.close()
-    time=range(0,int(samplePeriodNano)*(len(voltage)),int(samplePeriodNano))
-    t_bin = 3.625e-6 # seconds for one orbit
-    n_per_bin = int(np.round(t_bin/samplePeriod))
-    NumBins,PointsToRemove = np.divmod(len(voltage),n_per_bin)
-    #get rid of extra points
-    time = time[:-1*PointsToRemove]
-    voltage = voltage[:-1*PointsToRemove]
-    time = np.reshape(time,(NumBins,n_per_bin)).mean(axis=1)
-    voltage = np.reshape(voltage,(NumBins,n_per_bin)).sum(axis=1)
-    newPlotWindow(time, voltage, "Time (ns)", "?", "Processed graph for scan "+scanNum+" coord "+coordNum+" channel "+channelNum)
+#
+#def processedGraph():
+#    scanNum=scans.get()
+#    coordNum=coordinates.get()
+#    channelNum=convertChannelNameToIndex(channels.get())
+#    scan=read.scan(scanNum)
+#    coord=read.coordinate(scan, coordNum)
+#    channel = read.channel(coord, channelNum)
+#    attrs=read.channelHeader(channel)
+#    samplePeriodNano=int(attrs['SamplePeriod'])
+#    samplePeriod=1e-9*samplePeriodNano
+#    voltage=read.channelData(channel)
+#    scan.close()
+#    time=range(0,int(samplePeriodNano)*(len(voltage)),int(samplePeriodNano))
+#    t_bin = 3.625e-6 # seconds for one orbit
+#    n_per_bin = int(np.round(t_bin/samplePeriod))
+#    NumBins,PointsToRemove = np.divmod(len(voltage),n_per_bin)
+#    #get rid of extra points
+#    time = time[:-1*PointsToRemove]
+#    voltage = voltage[:-1*PointsToRemove]
+#    time = np.reshape(time,(NumBins,n_per_bin)).mean(axis=1)
+#    voltage = np.reshape(voltage,(NumBins,n_per_bin)).sum(axis=1)
+#    newPlotWindow(time, voltage, "Time (ns)", "?", "Processed graph for scan "+scanNum+" coord "+coordNum+" channel "+channelNum)
 
 def onClosing():
     if not scanLoop.getInitializeStatus():
@@ -394,8 +394,8 @@ chanAttrsButton.grid(column=2, row=3)
 graphButton = t.Button(topFrame, text='Raw Graph', command=rawGraph, width='15')
 graphButton.grid(column=0, row=4)
 
-graphButton2 = t.Button(topFrame, text='Processed Graph', command=processedGraph, width='15')
-graphButton2.grid(column=1, row=4)
+#graphButton2 = t.Button(topFrame, text='Processed Graph', command=processedGraph, width='15')
+#graphButton2.grid(column=1, row=4)
 
 validCheck = t.Checkbutton(topFrame, text='Valid Coordinate', command=flipValidity)
 validCheck.grid(column=2, row=4)
