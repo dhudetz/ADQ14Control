@@ -289,7 +289,7 @@ def showScreen(screenIndex):
 def updateConfig():
     file=open(os.getcwd()+"\config.config", 'w')
     file.write('Number of Samples : '+sampleEntry.get()+'\n')
-    file.write('Trig Delay : '+str(trigDelay.get())+'\n')
+    file.write('Trigger Delay : '+str(trigDelay.get())+'\n')
     file.write('Digitizer Name : '+str(nameEntry.get())+'\n')
     file.write('Num Repeats : '+str(averagesEntry.get())+'\n')
     if trigDelay.get()==69:
@@ -492,11 +492,11 @@ titlesLabel.grid(row=0, column=0)
 titlesLabel=t.Label(screen3, text="PV", font='Courier 14 bold')
 titlesLabel.grid(row=0, column=1)
 
-userTextBox=t.Text(screen3, height=maxPVs, width=34, bg="white")
-userTextBox.grid(row=1, column=0, rowspan=maxPVs)
-
 pvTextBox=t.Text(screen3, height=maxPVs, width=35, bg="white")
 pvTextBox.grid(row=1, column=1, rowspan=maxPVs)
+
+userTextBox=t.Text(screen3, height=maxPVs, width=34, bg="white")
+userTextBox.grid(row=1, column=0, rowspan=maxPVs)
 
 connectionLabels=[]
 
@@ -525,7 +525,7 @@ edit = t.Menu(menu, tearoff=0)
 file.add_command(label='Scan Control', command=lambda:showScreen(2)) 
 file.add_command(label='View Past Data', command=lambda:showScreen(0))
 edit.add_command(label='Initialization Configuration', command=lambda:showScreen(1))
-edit.add_command(label='PV Attributes', command=lambda:showScreen(3)) 
+edit.add_command(label='EPICS Variables', command=lambda:showScreen(3)) 
 
 menu.add_cascade(label='File', menu=file)
 menu.add_cascade(label='Edit', menu=edit)
