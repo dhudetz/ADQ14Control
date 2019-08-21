@@ -19,6 +19,7 @@ import datetime
 import gc
 import configReader
 
+# get the configurations and scan folder
 config=configReader.getContents(os.getcwd()+"\config.config")
 if "Scan Folder" in config:
     defaultFolder=config["Scan Folder"]
@@ -28,6 +29,7 @@ else:
     defaultFolder=os.getcwd()+"\Scans"
 
 class write:
+    # write a new scan
     def scan(scanNum):
         write.close()
         if not os.path.exists(defaultFolder):
@@ -47,6 +49,7 @@ class write:
                 file.attrs.create(key, config[key], dtype="S60")
         return file
     
+    # change a specific coordinate
     def specificCoordinate(file, coordNum):
         coordString=str(coordNum)
         while(len(coordString)<3):
@@ -59,6 +62,7 @@ class write:
             raise IndexError("Coordinate does not exist")
         return coord
     
+    # write a new coordinate
     def coordinate(file, coordHeader={}):
         coordNum=file.attrs.get("# Coords")
         file.attrs.modify("# Coords", coordNum+1)
@@ -83,7 +87,8 @@ class write:
                 coord.attrs.create(key, coordHeader[key])
             coord.attrs.create('Valid', 1)
             return coord
-        
+    
+    # write a new channel
     def channel(coordinate, channelNum, dat, channelHeader={}):   
         try:
             channel = coordinate.create_dataset('Channel_' + str(channelNum), data=dat, dtype='float16')
@@ -94,9 +99,11 @@ class write:
             channel.attrs.create(key, channelHeader[key])
         return channel
     
+    # change an attribute
     def updateAttribute(target, key, value):
         target.attrs.modify(key, value)
-
+        
+    # close the opened file
     def close():
         for obj in gc.get_objects():   # Browse through ALL objects
             if isinstance(obj, hdf.File):   # Just HDF5 files
@@ -105,6 +112,7 @@ class write:
                 except:
                     pass
 class read:
+    # read the a scan from a scan number
     def scan(scanNum):
         scanString=str(scanNum)
         while len(scanString)<3:
@@ -112,6 +120,7 @@ class read:
         file = hdf.File(defaultFolder+'\Scan_' + scanString + '.h5', 'r') #r for write access
         return file
     
+    # get the attributes of a scan
     def scanHeader(file):
         rawAttrs=file.attrs.items()
         attrs={}
@@ -120,6 +129,7 @@ class read:
         attrs=read.filterStrings(attrs)
         return attrs
     
+    # get a coordinate from a scan
     def coordinate(file, coordNum): #the coord number must start at 0 and move up by 1
         try:
             coord = file.get(list(file.items())[int(coordNum)][0]) #second index of items is just the name
@@ -127,6 +137,7 @@ class read:
             raise IndexError("Coordinate does not exist")
         return coord
     
+    # get the attributes of a coordinate
     def coordinateHeader(coordinate):
         rawAttrs=coordinate.attrs.items()
         attrs={}
@@ -135,6 +146,7 @@ class read:
         attrs=read.filterStrings(attrs)
         return attrs
     
+    # get a channel from a coordinate
     def channel(coordinate, channelNum):
         channels=coordinate.items()
         for i in range(len(channels)):
@@ -142,9 +154,11 @@ class read:
                 return coordinate.get(list(channels)[i][0]) #the second index is just the name of the channel
         raise RuntimeError("Channel does not exist.")
     
+    # get the data in a channel
     def channelData(channel):
         return np.array(channel)
     
+    # get the attributes of a channel
     def channelHeader(channel):
         rawAttrs=channel.attrs.items()
         attrs={}
@@ -153,6 +167,7 @@ class read:
         attrs=read.filterStrings(attrs)
         return attrs
     
+    # get the names of all of a coordinates in a scan from a scan number
     def coordinateNames(scanNum):
         file=read.scan(scanNum)
         names=[]
@@ -161,6 +176,7 @@ class read:
         file.close()
         return names
     
+    # get the names of the channels in a coordinate from a scan number and coordinate number
     def channelNames(scanNum, coordNum):
         file=read.scan(scanNum)
         coord=read.coordinate(file, coordNum)
@@ -169,7 +185,8 @@ class read:
             names.append(i[0])
         file.close()
         return names
-
+    
+    # make sure attributes don't contain \n and are converted to strings
     def filterStrings(header):
         for key in header.keys():
             try:

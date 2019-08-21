@@ -42,6 +42,7 @@ rollingAverage=[]
 pv=configReader.getContents(os.getcwd()+'\PV.config')
 config=configReader.getContents(os.getcwd()+'\config.config')
 
+# reload the configuration file and the scan folder
 def reloadFolder():
     config=configReader.getContents(os.getcwd()+'\config.config')
     if "Scan Folder" in config:
@@ -53,6 +54,7 @@ def reloadFolder():
 
 reloadFolder()
 
+# save the data that is currently held in memory
 def writeData(header_list, numChannels, data):
     reloadFolder()
     scanNum=epics.caget(pv['Scan Number'])-1
@@ -70,12 +72,14 @@ def writeData(header_list, numChannels, data):
             write.channel(coord, ch, data[ch], channelHeader)
     scan.close()
 
+# save the new data into the average with the proper weight
 def processAverage(newData, weight):
     global rollingAverage
     rollingAverage*=weight
     rollingAverage=np.average([rollingAverage, newData], axis=0)
     rollingAverage/=(weight+1)
 
+# one time initialization of the digitizer
 def initialize(samples, pretriggerPercentage):
     global ADQAPI,adq_cu,adq_num,number_of_channels,input_range, samples_per_record, n_of_ADQ, numAverages, config, useChannels, average
     
@@ -157,6 +161,7 @@ def initialize(samples, pretriggerPercentage):
     
     print("Number of Channels: "+str(number_of_channels))
 
+# after initialized, take a new coordinate when a trigger is detected
 def newCoordinate():
     global rollingAverage
     counter=0
@@ -225,12 +230,14 @@ def newCoordinate():
     else:
         print('Coordinate complete.')
 
+# properly shut down the digitizer to prevent destablization
 def stop():
     global n_of_ADQ
     # Close multirecord
     ADQAPI.ADQ_MultiRecordClose(adq_cu, adq_num)
     # Delete ADQControlunit
     ADQAPI.DeleteADQControlUnit(adq_cu)
-    
+
+# return the number of devices detected (1 or 0)
 def getNumDevices():
     return n_of_ADQ

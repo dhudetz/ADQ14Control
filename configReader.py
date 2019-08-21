@@ -7,6 +7,7 @@ The purpose of this script is to easily read custom formatted config files.
 """
 import os
 
+# general use to give a dictionary of the contents in a config file
 def getContents(path):
     contents={}
     if os.path.exists(path):

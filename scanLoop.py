@@ -18,7 +18,8 @@ run=False
 initializing=False
 pv=configReader.getContents(os.getcwd()+'\PV.config')
 
-def infiniteLoop():
+# the main scan loop
+def scanLoop():
     global scanStatus, run
     while(run):
         #check for new scan
@@ -42,6 +43,7 @@ def infiniteLoop():
                 print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                 print("End of scan.\n")
 
+# initilize the digitizer and start the scan loop
 def initialize(numSamples, pretriggerPercentage):
     global scanStatus, run, initializing
     initializing=True
@@ -50,15 +52,18 @@ def initialize(numSamples, pretriggerPercentage):
     epics.caput(pv["Busy Button"], 0)
     ADQ14.initialize(numSamples, pretriggerPercentage)
     initializing=False
-    t1=threading.Thread(target=infiniteLoop)
+    t1=threading.Thread(target=scanLoop)
     t1.start()
 
+# check if the initilization ongoing
 def getInitializeStatus():
     return initializing
 
+#check if the scan loop is in progress
 def getRunStatus():
     return run
 
+# properly shut down the scan loop
 def stop():
     global run
     if run and not initializing:
@@ -66,10 +71,12 @@ def stop():
         ADQ14.stop()
         run=False
     
+# start a new scan
 def scan():
     global scanStatus
     if run and not initializing:
         epics.caput(pv["Scan Button"],1)
-        
+
+# pass on the number of devices (0 or 1)
 def getNumDevices():
     return ADQ14.getNumDevices()

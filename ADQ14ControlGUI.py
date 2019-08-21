@@ -2,7 +2,7 @@
 Created on Mon Jun 10 11:12:57 2019
 
 This GUI controls and views the attributes and graphs of HDF5 data
-aquisition files from the ADQ14DC-4A-VG-USB digitizer.
+aquisition files from the ADQ14DC-4A-VG digitizer.
 
 @author: Dan Hudetz
 """
@@ -13,24 +13,27 @@ from HDFWriteRead import read
 from HDFWriteRead import write
 from matplotlib.figure import Figure
 import os
-import numpy as np
 import threading
 import scanLoop
 import configReader
 import epics
 from random import randrange
 
+# this function is tied with the event of the dropdown for SCANS on the 'View Past Data' screen.
 def scanChange(event):
     updateCoords()
     readScanAttributes()
 
+# this function is tied with the event of the dropdown for COORDINATES on the 'View Past Data' screen.
 def coordChange(event):
     updateChannels()
     readCoordinateAttributes()
     
+# this function is tied with the event of the dropdown for CHANNELS on the 'View Past Data' screen.
 def channelChange(event):
     readChannelAttributes()
 
+# updates the dropdown menu of scans by checking the scan folder
 def updateScans():
     scansList=[]
     if os.path.exists(defaultFolder):
@@ -46,6 +49,7 @@ def updateScans():
             pass
         updateCoords()
 
+# checks if the currently selected coordinate is valid
 def readValidity():
     scanNum=scans.get()
     coordNum=coordinates.get()
@@ -57,7 +61,8 @@ def readValidity():
         return True
     else:
         return False
-    
+
+# if the currently selected coordinate is valid, update the checkmark widget
 def updateValidity():
     if readValidity():
         validCheck.configure(bg="#e3ebd5", fg="black", text="Valid Coordinate")
@@ -65,7 +70,8 @@ def updateValidity():
     else:
         validCheck.configure(bg="red", fg="white", text="Invalid Coordinate")
         validCheck.deselect()
-    
+
+# flip the validity of a the currently selected coordinate
 def flipValidity():
     scanNum=scans.get()
     coordNum=coordinates.get()
@@ -85,6 +91,7 @@ def flipValidity():
         readCoordinateAttributes()
     scan.close()
     
+# update the dropdown coordinate menu with all of the coordinates in the selected scan
 def updateCoords():
     try:
         coordsList=read.coordinateNames(scans.get())
@@ -100,6 +107,7 @@ def updateCoords():
     except:
         print("No scans in the /Scans")
 
+# update the dropdown channel menu with all of the channels in the selected coordinate
 def updateChannels():
     channelsList=read.channelNames(scans.get(), coordinates.get())
     for i in range(len(channelsList)):
@@ -109,6 +117,7 @@ def updateChannels():
     channels.current(0) #set the selected it
     updateValidity()
 
+# display the selected scan attributes
 def readScanAttributes():
     selectedScan=scans.get()
     scan = read.scan(selectedScan)
@@ -118,6 +127,7 @@ def readScanAttributes():
         message=message+str(k)+' = '+str(attributes[k])+'\n'
     attributesMessage.configure(text=message)
 
+# display the selected coordinate attributes
 def readCoordinateAttributes():
     scanNum=scans.get()
     coordNum=coordinates.get()
@@ -130,12 +140,14 @@ def readCoordinateAttributes():
         message=message+str(k)+' = '+str(attrs[k])+'\n'
     attributesMessage.configure(text=message)
 
+# get the index of a channel from the name of the channel
 def convertChannelNameToIndex(a):
     for i, name in enumerate(channelNames):
         if name==a:
             return str(i)
     return '0'
 
+# display the selected channel attributes
 def readChannelAttributes():
     selectedScan=scans.get()
     selectedCoordinate=coordinates.get()
@@ -155,6 +167,7 @@ def newColors(event):
         colors.append('#'+str(hex(randrange(16777216))[2:].zfill(6)))
     window.tk_setPalette(background=colors[0], foreground=colors[1], activeBackground=colors[2], activeForeground=colors[3])
 
+# open a seperate GUI for a plot
 def newPlotWindow(xData, yData, xlabel, ylabel, title):
     graphWindow = t.Tk()
     graphWindow.wm_title("ADQ14 Control Graph")
@@ -183,6 +196,7 @@ def newPlotWindow(xData, yData, xlabel, ylabel, title):
     
     t.mainloop()
 
+# get the data for a graph of data and pass it through newPlotWindow()
 def rawGraph():
     scanNum=scans.get()
     coordNum=coordinates.get()
@@ -196,30 +210,8 @@ def rawGraph():
     scan.close()
     time=range(0,samplePeriodNano*(len(voltage)),samplePeriodNano)
     newPlotWindow(time, voltage, "Time (ns)", "Voltage (V)", "Raw graph for scan "+scanNum+" coord "+coordNum+" channel "+channelNum)
-#
-#def processedGraph():
-#    scanNum=scans.get()
-#    coordNum=coordinates.get()
-#    channelNum=convertChannelNameToIndex(channels.get())
-#    scan=read.scan(scanNum)
-#    coord=read.coordinate(scan, coordNum)
-#    channel = read.channel(coord, channelNum)
-#    attrs=read.channelHeader(channel)
-#    samplePeriodNano=int(attrs['SamplePeriod'])
-#    samplePeriod=1e-9*samplePeriodNano
-#    voltage=read.channelData(channel)
-#    scan.close()
-#    time=range(0,int(samplePeriodNano)*(len(voltage)),int(samplePeriodNano))
-#    t_bin = 3.625e-6 # seconds for one orbit
-#    n_per_bin = int(np.round(t_bin/samplePeriod))
-#    NumBins,PointsToRemove = np.divmod(len(voltage),n_per_bin)
-#    #get rid of extra points
-#    time = time[:-1*PointsToRemove]
-#    voltage = voltage[:-1*PointsToRemove]
-#    time = np.reshape(time,(NumBins,n_per_bin)).mean(axis=1)
-#    voltage = np.reshape(voltage,(NumBins,n_per_bin)).sum(axis=1)
-#    newPlotWindow(time, voltage, "Time (ns)", "?", "Processed graph for scan "+scanNum+" coord "+coordNum+" channel "+channelNum)
 
+# event when GUI is closed. Safely shuts down scan loop
 def onClosing():
     if not scanLoop.getInitializeStatus():
         scanLoop.stop()    
@@ -232,7 +224,7 @@ def onClosing():
             window.quit()
             window.destroy()
 
-
+# talk to scanLoop.py and start scan loop
 def startScanLoop():
     if 'Number of Samples' in config:
         numSamples=int(config['Number of Samples'])
@@ -249,6 +241,7 @@ def startScanLoop():
     scanStatusLabel.configure(fg="green", bg="black", text="Active")
     newScanButton.configure(state='normal')
 
+# stop the scanLoop
 spamCount=0
 def stopScanLoop():
     global spamCount
@@ -264,6 +257,7 @@ def stopScanLoop():
         if spamCount>8:
             scanStatusLabel.configure(fg="white", bg="black", text="BRO, CHILL")
 
+# if possible, starts a new scan
 def newScan():
     global spamCount
     if scanLoop.getNumDevices()==0:
@@ -275,6 +269,7 @@ def newScan():
         scanStatusLabel.configure(fg="green", bg="black", text="Active")
         scanLoop.scan()
 
+# change the current screen
 def showScreen(screenIndex):
     if screenIndex==0:
         updateScans()
@@ -286,6 +281,7 @@ def showScreen(screenIndex):
                 pass
     screens[screenIndex].pack()
 
+# update the saved configuration settings to the new ones selected on the 'Initialization Configuration' screen
 def updateConfig():
     file=open(os.getcwd()+"\config.config", 'w')
     file.write('Number of Samples : '+sampleEntry.get()+'\n')
@@ -310,6 +306,7 @@ def updateConfig():
     print('Config file saved.')
     print('Note: for new config, reinitialize digitizer.')
 
+# update the currently selected EPICS variables
 def updatePVs():
     userLines=[]
     pvLines=[]
@@ -336,6 +333,7 @@ def updatePVs():
 
 
 ###############################################################################
+# setting up scan folder and config locations
 config=configReader.getContents(os.getcwd()+"\config.config")
 pv=configReader.getContents(os.getcwd()+"\PV.config")
 if "Scan Folder" in config:
@@ -345,14 +343,15 @@ if "Scan Folder" in config:
 else:
     defaultFolder=os.getcwd()+"\Scans"
     
-#GUI SETUP below
 ###############################################################################
+# set up GUI window
 window = t.Tk()
 window.wm_title("ADQ14 Control")
 window.geometry('575x550')
 window.tk_setPalette(background='#e3ebd5', foreground='black', activeBackground='#143d0c', activeForeground='white')
 screens=[]
 ###############################################################################
+# past data screen
 screen0 = t.Frame(window)
 
 
@@ -394,9 +393,6 @@ chanAttrsButton.grid(column=2, row=3)
 graphButton = t.Button(topFrame, text='Raw Graph', command=rawGraph, width='15')
 graphButton.grid(column=0, row=4)
 
-#graphButton2 = t.Button(topFrame, text='Processed Graph', command=processedGraph, width='15')
-#graphButton2.grid(column=1, row=4)
-
 validCheck = t.Checkbutton(topFrame, text='Valid Coordinate', command=flipValidity)
 validCheck.grid(column=2, row=4)
 
@@ -405,6 +401,7 @@ attributesMessage.grid(column=2, row=1)
 
 screens.append(screen0)
 ###############################################################################
+# configuration screen
 screen1 = t.Frame(window)
 
 configTitle=t.Label(screen1, text="Initialization Configuration", font=("Courier 14 bold"))
@@ -465,6 +462,7 @@ updateConfigButton.grid(row=6+len(channelNames), column=0, columnspan=2)
 
 screens.append(screen1)
 ###############################################################################
+# ADQ control screen
 screen2 = t.Frame(window)
 screen2.pack()
 
@@ -484,6 +482,7 @@ scanStatusLabel.grid(row=4)
 
 screens.append(screen2)
 ###############################################################################
+# EPICS variables screen
 screen3 = t.Frame(window)
 
 maxPVs=30
@@ -517,6 +516,7 @@ updatePVButton.grid(row=maxPVs+1, column=0)
 
 screens.append(screen3)
 ###############################################################################
+# menus setup
 menu = t.Menu(window)
  
 file = t.Menu(menu, tearoff=0)
